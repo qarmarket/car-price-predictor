@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Plus, X } from "lucide-react";
+import { toast } from "sonner";
 
 interface CarSelection {
   id: string;
@@ -42,6 +43,15 @@ export const TrendChart = () => {
 
   const addCar = () => {
     if (!currentCar.make || !currentCar.model) {
+      toast.error("Please select make and model");
+      return;
+    }
+
+    const startYear = parseInt(currentCar.startYear || "2013");
+    const endYear = parseInt(currentCar.endYear || "2024");
+
+    if (startYear >= endYear) {
+      toast.error("Start year must be less than end year");
       return;
     }
 
@@ -145,7 +155,21 @@ export const TrendChart = () => {
                 <Label htmlFor="start-year">Start Year</Label>
                 <Select
                   value={currentCar.startYear}
-                  onValueChange={(value) => setCurrentCar({ ...currentCar, startYear: value })}
+                  onValueChange={(value) => {
+                    const newStartYear = parseInt(value);
+                    const currentEndYear = parseInt(currentCar.endYear || "2024");
+                    
+                    // If start year is >= end year, adjust end year
+                    if (newStartYear >= currentEndYear) {
+                      setCurrentCar({ 
+                        ...currentCar, 
+                        startYear: value, 
+                        endYear: (newStartYear + 1).toString() 
+                      });
+                    } else {
+                      setCurrentCar({ ...currentCar, startYear: value });
+                    }
+                  }}
                 >
                   <SelectTrigger id="start-year">
                     <SelectValue />
@@ -164,7 +188,21 @@ export const TrendChart = () => {
                 <Label htmlFor="end-year">End Year</Label>
                 <Select
                   value={currentCar.endYear}
-                  onValueChange={(value) => setCurrentCar({ ...currentCar, endYear: value })}
+                  onValueChange={(value) => {
+                    const newEndYear = parseInt(value);
+                    const currentStartYear = parseInt(currentCar.startYear || "2013");
+                    
+                    // If end year is <= start year, adjust start year
+                    if (newEndYear <= currentStartYear) {
+                      setCurrentCar({ 
+                        ...currentCar, 
+                        startYear: (newEndYear - 1).toString(), 
+                        endYear: value 
+                      });
+                    } else {
+                      setCurrentCar({ ...currentCar, endYear: value });
+                    }
+                  }}
                 >
                   <SelectTrigger id="end-year">
                     <SelectValue />
