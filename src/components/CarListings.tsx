@@ -21,6 +21,29 @@ interface CarListing {
   url: string;
 }
 
+// Brand and model data
+const carDatabase: Record<string, string[]> = {
+  "Toyota": ["Land Cruiser", "Prado", "Camry", "Corolla", "Hilux", "RAV4", "Yaris", "Fortuner"],
+  "Nissan": ["Patrol", "Pathfinder", "Altima", "Maxima", "X-Trail", "Kicks", "Sunny"],
+  "Lexus": ["LX", "GX", "RX", "ES", "LS", "NX", "UX"],
+  "BMW": ["X5", "X6", "X7", "3 Series", "5 Series", "7 Series", "X3", "X1"],
+  "Mercedes-Benz": ["G-Class", "GLE", "GLC", "E-Class", "S-Class", "C-Class", "A-Class"],
+  "Audi": ["Q7", "Q8", "Q5", "A6", "A4", "A3", "Q3"],
+  "Honda": ["Accord", "Civic", "CR-V", "Pilot", "City"],
+  "Hyundai": ["Tucson", "Santa Fe", "Elantra", "Sonata", "Creta"],
+  "Kia": ["Sportage", "Sorento", "Seltos", "Cerato", "Carnival"],
+  "Ford": ["Explorer", "Expedition", "F-150", "Edge", "Mustang"],
+  "Chevrolet": ["Tahoe", "Suburban", "Traverse", "Silverado"],
+  "GMC": ["Yukon", "Sierra", "Terrain", "Acadia"],
+  "Jeep": ["Wrangler", "Grand Cherokee", "Cherokee", "Compass"],
+  "Land Rover": ["Range Rover", "Range Rover Sport", "Discovery", "Defender"],
+  "Porsche": ["Cayenne", "Macan", "Panamera", "911"],
+  "Mitsubishi": ["Pajero", "Outlander", "Lancer", "Attrage"],
+  "Mazda": ["CX-5", "CX-9", "CX-3", "3", "6"],
+  "Volkswagen": ["Tiguan", "Touareg", "Passat", "Golf"],
+  "Jetour": ["T2", "X70", "X90", "Dashing"]
+};
+
 // Sample data
 const sampleListings: CarListing[] = [
   {
@@ -61,6 +84,12 @@ export const CarListings = () => {
     yearTo: "",
   });
   const [listings, setListings] = useState<CarListing[]>([]);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+
+  const handleBrandChange = (brand: string) => {
+    setSearchData({ ...searchData, brand, model: "" });
+    setAvailableModels(carDatabase[brand] || []);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,22 +126,41 @@ export const CarListings = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="search-brand">Brand</Label>
-                  <Input
-                    id="search-brand"
-                    placeholder="e.g., Toyota"
+                  <Select
                     value={searchData.brand}
-                    onChange={(e) => setSearchData({ ...searchData, brand: e.target.value })}
-                  />
+                    onValueChange={handleBrandChange}
+                  >
+                    <SelectTrigger id="search-brand">
+                      <SelectValue placeholder="Select brand" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.keys(carDatabase).sort().map((brand) => (
+                        <SelectItem key={brand} value={brand}>
+                          {brand}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="search-model">Model</Label>
-                  <Input
-                    id="search-model"
-                    placeholder="e.g., Land Cruiser"
+                  <Select
                     value={searchData.model}
-                    onChange={(e) => setSearchData({ ...searchData, model: e.target.value })}
-                  />
+                    onValueChange={(value) => setSearchData({ ...searchData, model: value })}
+                    disabled={!searchData.brand}
+                  >
+                    <SelectTrigger id="search-model">
+                      <SelectValue placeholder={searchData.brand ? "Select model" : "Select brand first"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableModels.map((model) => (
+                        <SelectItem key={model} value={model}>
+                          {model}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
